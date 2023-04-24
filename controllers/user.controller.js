@@ -103,17 +103,16 @@ exports.getUsersByCarBrandAndEmail = async (req, res) => {
 
 exports.getTopCitiesAndAvgIncome = async (req, res) => {
   try {
-    const data = await User.aggregate([
-      {
-        $group: {
-          _id: '$city',
-          count: { $sum: 1 },
-          avgIncome: { $avg: '$income' },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-    ]);
+    const data = await User.aggregate()
+      .group({
+        _id: '$city',
+        count: { $sum: 1 },
+        totalIncome: { $sum: { $toDouble: { $substr: ['$income', 1, -1] } } },
+      })
+      .sort({ count: -1 })
+      .limit(10)
+      .exec();
+
     res.status(RESPONSE_STATUS.SUCCESS).json({
       response: RESPONSES.SUCCESS,
       message: RESPONSE_MESSAGES.SUCCESS,
