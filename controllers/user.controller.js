@@ -27,13 +27,18 @@ exports.importData = async (req, res) => {
 exports.getUsersByIncomeAndCarBrand = async (req, res) => {
   try {
     const data = await User.find({
-      income: { $lt: 5 },
       $or: [{ car: 'BMW' }, { car: 'Mercedes-Benz' }],
     });
+
+    const filteredUsers = data.filter((user) => {
+      const income = parseInt(user.income.replace('$', '').replace(',', ''));
+      return income < 5;
+    });
+
     res.status(RESPONSE_STATUS.SUCCESS).json({
       response: RESPONSES.SUCCESS,
       message: RESPONSE_MESSAGES.SUCCESS,
-      data,
+      data: filteredUsers,
     });
   } catch (err) {
     res.status(RESPONSE_STATUS.ERROR).json({
@@ -47,12 +52,15 @@ exports.getMaleUsersByPhonePrice = async (req, res) => {
   try {
     const data = await User.find({
       gender: 'Male',
-      phone_price: { $gt: 10000 },
     });
+    const filteredUsers = data.filter(
+      (user) => parseInt(user.phone_price) > 10000
+    );
+
     res.status(RESPONSE_STATUS.SUCCESS).json({
       response: RESPONSES.SUCCESS,
       message: RESPONSE_MESSAGES.SUCCESS,
-      data: data,
+      data: filteredUsers,
     });
   } catch (err) {
     res.status(RESPONSE_STATUS.ERROR).json({
@@ -85,7 +93,7 @@ exports.getUsersByLastNameAndQuoteLength = async (req, res) => {
 exports.getUsersByCarBrandAndEmail = async (req, res) => {
   try {
     const data = await User.find({
-      car: { $in: ['BMW', 'Mercedes', 'Audi'] },
+      car: { $in: ['BMW', 'Mercedes-Benz', 'Audi'] },
       email: { $not: /[\d]/ },
     });
     res.status(RESPONSE_STATUS.SUCCESS).json({
