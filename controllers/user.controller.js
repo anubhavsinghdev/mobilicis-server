@@ -113,6 +113,11 @@ exports.getTopCitiesAndAvgIncome = async (req, res) => {
       .limit(10)
       .exec();
 
+    for (let city of data) {
+      city.avgIncome = city.totalIncome / city.count;
+      delete city.totalIncome;
+    }
+
     res.status(RESPONSE_STATUS.SUCCESS).json({
       response: RESPONSES.SUCCESS,
       message: RESPONSE_MESSAGES.SUCCESS,
